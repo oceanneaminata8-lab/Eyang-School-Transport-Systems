@@ -36,7 +36,7 @@ export class ApiService {
     return this.http.get<AdminDashboard>(`${environment.apiBaseUrl}/api/admin/dashboard`);
   }
 
-  updateProfile(payload: { fullName: string; password?: string; photoDataUrl?: string }) {
+  updateProfile(payload: { fullName: string; email: string; password?: string; photoDataUrl?: string; matricule?: string; levelLabel?: string; department?: string }) {
     return this.http.put<UserProfile>(`${environment.apiBaseUrl}/api/profile`, payload);
   }
 

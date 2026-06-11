@@ -37,7 +37,6 @@ import { OfflineService } from '../core/offline.service';
         <section class="summary-card">
           <div class="summary-content">
             <div class="brand">
-              <img src="assets/st jean logo.png" alt="Logo">
               <div class="brand-text">
                 <h1>My Transport</h1>
                 <p>{{ profileLevel }} • {{ profileDepartment }}</p>

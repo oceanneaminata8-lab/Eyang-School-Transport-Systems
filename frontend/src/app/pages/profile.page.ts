@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { IonButton, IonContent, IonInput, IonItem, IonText } from '@ionic/angular/standalone';
 import { ApiService, BootstrapData } from '../core/api.service';
 import { OfflineService } from '../core/offline.service';
@@ -25,10 +26,15 @@ import { OfflineService } from '../core/offline.service';
             <label class="photo-button">Upload photo<input type="file" accept="image/*" (change)="onPhotoSelected($event)"></label>
           </div>
           <ion-item><ion-input label="Name" labelPlacement="stacked" [(ngModel)]="fullName" /></ion-item>
-          <ion-item><ion-input label="Email" labelPlacement="stacked" [value]="email" [readonly]="true" /></ion-item>
-          <ion-item><ion-input label="Matricule" labelPlacement="stacked" [value]="matricule" [readonly]="true" /></ion-item>
+          <ion-item><ion-input label="Email" labelPlacement="stacked" type="email" [(ngModel)]="email" /></ion-item>
+          @if (role === 'student') {
+            <ion-item><ion-input label="Matricule" labelPlacement="stacked" [(ngModel)]="matricule" /></ion-item>
+            <ion-item><ion-input label="Level" labelPlacement="stacked" [(ngModel)]="levelLabel" /></ion-item>
+            <ion-item><ion-input label="Department" labelPlacement="stacked" [(ngModel)]="department" /></ion-item>
+          }
           <ion-item><ion-input label="New password" labelPlacement="stacked" type="password" placeholder="Leave blank to keep current password" [(ngModel)]="password" /></ion-item>
           <ion-button expand="block" class="primary-button" (click)="save()">Save Profile</ion-button>
+          <button class="logout-button" type="button" (click)="logout()">Log Out</button>
           @if (message) { <ion-text>{{ message }}</ion-text> }
         </section>
       </main>
@@ -41,18 +47,22 @@ import { OfflineService } from '../core/offline.service';
     .photo-button{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border-radius:14px;background:#edf1f7;color:#215be6;font-weight:800;font-size:13px;white-space:nowrap}
     .photo-button input{position:absolute;inset:0;opacity:0}
     ion-item{--background:#f2f5fb;--border-radius:16px;margin:12px 0}
+    .logout-button{width:100%;min-height:54px;margin-top:12px;border:1px solid #fecaca;border-radius:18px;background:#fff1f2;color:#dc2626;font-weight:850;font-size:15px}
   `]
 })
 export class ProfilePage implements OnInit {
   fullName = '';
   email = '';
   matricule = '';
+  levelLabel = '';
+  department = '';
   password = '';
   photoDataUrl = '';
   photoPreview = '';
   message = '';
+  role = JSON.parse(localStorage.getItem('ests_user') || '{}').role || 'student';
 
-  constructor(private api: ApiService, private offline: OfflineService) {}
+  constructor(private api: ApiService, private offline: OfflineService, private router: Router) {}
 
   ngOnInit() {
     this.api.bootstrap().subscribe({
@@ -68,6 +78,8 @@ export class ProfilePage implements OnInit {
     this.fullName = data.profile?.full_name || '';
     this.email = data.profile?.email || '';
     this.matricule = data.profile?.matricule || '';
+    this.levelLabel = data.profile?.level_label || '';
+    this.department = data.profile?.department || '';
     this.photoDataUrl = data.profile?.photo_data_url || '';
   }
 
@@ -82,22 +94,38 @@ export class ProfilePage implements OnInit {
 
   save() {
     this.message = '';
-    if (!this.fullName.trim()) {
-      this.message = 'Please enter your name.';
+    if (!this.fullName.trim() || !this.email.trim()) {
+      this.message = 'Please enter your name and email.';
       return;
     }
-    this.api.updateProfile({ fullName: this.fullName, password: this.password, photoDataUrl: this.photoPreview }).subscribe({
+    this.api.updateProfile({
+      fullName: this.fullName,
+      email: this.email,
+      password: this.password,
+      photoDataUrl: this.photoPreview,
+      matricule: this.matricule,
+      levelLabel: this.levelLabel,
+      department: this.department
+    }).subscribe({
       next: profile => {
         this.message = 'Profile updated.';
         this.password = '';
         this.photoDataUrl = profile.photo_data_url || this.photoDataUrl;
         const stored = JSON.parse(localStorage.getItem('ests_user') || '{}');
         stored.fullName = profile.full_name;
+        stored.email = profile.email;
         stored.photoDataUrl = profile.photo_data_url;
         localStorage.setItem('ests_user', JSON.stringify(stored));
       },
       error: err => this.message = err.error?.message || 'Could not update profile.'
     });
+  }
+
+  logout() {
+    localStorage.removeItem('ests_token');
+    localStorage.removeItem('ests_user');
+    localStorage.removeItem('active_round');
+    void this.router.navigateByUrl('/login');
   }
 
   initials(name = '?') {

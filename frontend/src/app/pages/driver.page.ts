@@ -1,303 +1,366 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Geolocation } from '@capacitor/geolocation';
-import { IonButton, IonContent, IonInput, IonItem, IonText, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { carOutline, qrCodeOutline, locationOutline, checkmarkCircleOutline, alertCircleOutline, shieldCheckmarkOutline } from 'ionicons/icons';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import { ApiService, BootstrapData, PickupRound } from '../core/api.service';
 import { OfflineService } from '../core/offline.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, IonContent, IonButton, IonInput, IonItem, IonText, IonIcon],
+  imports: [CommonModule, FormsModule, IonContent, IonIcon],
   template: `
-    <ion-content>
+    <ion-content class="driver-content">
       <main class="page driver-page">
-        <header class="topbar">
-          <div class="user-info">
-            <div class="avatar-container">
-              <div class="avatar-fallback">{{ initials(driverName) }}</div>
-              <div class="status-indicator"></div>
+        <section class="hero">
+          <header class="topbar">
+            <div class="user-info">
+              <div class="avatar-container">
+                <div class="avatar-fallback">{{ initials(driverName) }}</div>
+              </div>
+              <div class="welcome-text">
+                <p class="greeting">Welcome,</p>
+                <h2 class="user-name">{{ driverName }}</h2>
+              </div>
             </div>
-            <div class="welcome-text">
-              <p class="greeting">Welcome,</p>
-              <h2 class="user-name">{{ driverName }}</h2>
-            </div>
-          </div>
-          <div class="role-badge">Driver</div>
-        </header>
+            <div class="role-badge">Driver</div>
+          </header>
 
-        <section class="info-card">
-          <div class="info-icon">
-            <ion-icon name="shield-checkmark-outline"></ion-icon>
-          </div>
-          <div class="info-text">
-            <h3>Security Boarding</h3>
-            <p>Scan student QR passes to verify payment and reservation.</p>
-          </div>
+          <section class="info-card">
+            <div class="info-icon">
+              <ion-icon name="shield-checkmark-outline"></ion-icon>
+            </div>
+            <div class="info-text">
+              <h3>Security Boarding</h3>
+              <p>Scan student QR passes to verify payment and reservation.</p>
+            </div>
+          </section>
+
+          <section class="bus-config">
+            <div class="section-header light">
+              <h3><ion-icon name="car-outline"></ion-icon> Bus Details</h3>
+            </div>
+            <div class="config-card">
+              <label class="bus-field plate-field">
+                <span>Plate Number</span>
+                <input [(ngModel)]="plate" placeholder="LT 0000 X" />
+              </label>
+              <label class="bus-field">
+                <span>Color</span>
+                <input [(ngModel)]="color" placeholder="Blue" />
+              </label>
+              <label class="bus-field">
+                <span>Capacity</span>
+                <input type="number" [(ngModel)]="capacity" placeholder="30" />
+              </label>
+            </div>
+          </section>
         </section>
 
-        <section class="bus-config">
-          <div class="section-header">
-            <h3><ion-icon name="car-outline"></ion-icon> Bus Details</h3>
+        <section class="lower-panel">
+          <div class="main-actions">
+            <button class="btn-primary" (click)='startRound()'>
+              <ion-icon name="qr-code-outline"></ion-icon>
+              Start Pickup Round
+            </button>
+            <button class="btn-secondary" (click)="sendGps()">
+              <ion-icon name="location-outline"></ion-icon>
+              Send GPS
+            </button>
           </div>
-          <div class="card config-card">
-            <div class="input-grid">
-              <ion-item lines="none" class="custom-item">
-                <ion-input label="Plate Number" labelPlacement="stacked" [(ngModel)]="plate" placeholder="LT 0000 X" />
-              </ion-item>
-              <ion-item lines="none" class="custom-item">
-                <ion-input label="Color" labelPlacement="stacked" [(ngModel)]="color" placeholder="Blue" />
-              </ion-item>
-              <ion-item lines="none" class="custom-item">
-                <ion-input label="Capacity" labelPlacement="stacked" type="number" [(ngModel)]="capacity" placeholder="30" />
-              </ion-item>
+
+          <section class="scanner-section">
+            <div class="section-header light">
+              <h3><ion-icon name="qr-code-outline"></ion-icon> QR Scanner</h3>
             </div>
-          </div>
-        </section>
-
-        <div class="main-actions">
-          <button class="btn-primary" (click)='startRound()'>
-            <ion-icon name="qr-code-outline"></ion-icon>
-            Start Pickup Round
-          </button>
-          <button class="btn-secondary" (click)="sendGps()">
-            <ion-icon name="location-outline"></ion-icon>
-            Send GPS
-          </button>
-        </div>
-
-        <section class="scanner-section">
-          <div class="section-header">
-            <h3><ion-icon name="qr-code-outline"></ion-icon> QR Scanner</h3>
-          </div>
-          <div class="scanner-container">
-            <div id="reader"></div>
-            <div class="scanner-overlay"></div>
-          </div>
-        </section>
-
-        @if (message) {
-          <div class="scan-result" [class.granted]="lastScanValid === true" [class.denied]="lastScanValid === false">
-            <ion-icon [name]="lastScanValid ? 'checkmark-circle-outline' : 'alert-circle-outline'"></ion-icon>
-            <div class="result-text">
-              <h4>{{ lastScanValid === true ? 'Access Granted' : (lastScanValid === false ? 'Access Denied' : 'Notice') }}</h4>
-              <p>{{ message }}</p>
+            <div class="scanner-container">
+              <div id="reader"></div>
             </div>
-          </div>
-        }
+          </section>
+
+          @if (message) {
+            <div class="scan-result" [class.granted]="lastScanValid === true" [class.denied]="lastScanValid === false">
+              <ion-icon [name]="lastScanValid ? 'checkmark-circle-outline' : 'alert-circle-outline'"></ion-icon>
+              <div class="result-text">
+                <h4>{{ lastScanValid === true ? 'Access Granted' : (lastScanValid === false ? 'Access Denied' : 'Notice') }}</h4>
+                <p>{{ message }}</p>
+              </div>
+            </div>
+          }
+        </section>
       </main>
     </ion-content>
   `,
   styles: [`
+    :host {
+      --driver-blue: #2f75f4;
+      --driver-navy: #07162c;
+    }
+
+    .driver-content {
+      --background: #6f6b67;
+    }
+
     .driver-page {
-      padding: 20px;
-      background: #f8fafc;
+      max-width: 760px;
+      padding: 0 0 32px;
+      background: #726e69;
       min-height: 100%;
+      overflow: hidden;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 720px;
+      padding: 112px 56px 32px;
+      background:
+        linear-gradient(180deg, rgba(0, 100, 180, .18) 0%, rgba(3, 19, 42, .03) 42%, rgba(3, 16, 34, .7) 100%),
+        url('/assets/ChatGPT Image May 25, 2026, 08_40_04 PM.png') center top / cover no-repeat;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 0;
+      height: 250px;
+      background: url('/assets/student-dashboard-bus.png') 62% 58% / cover no-repeat;
+      opacity: .92;
+      mask-image: linear-gradient(to bottom, transparent, #000 28%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 28%);
+    }
+
+    .topbar, .info-card, .bus-config {
+      position: relative;
+      z-index: 1;
     }
 
     .topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
     }
 
     .user-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
     }
 
     .avatar-fallback {
-      width: 50px;
-      height: 50px;
-      border-radius: 16px;
-      background: #0f172a;
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: rgba(5, 20, 43, .95);
+      border: 1px solid rgba(255,255,255,.9);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 18px;
-    }
-
-    .status-indicator {
-      position: absolute;
-      bottom: -2px;
-      right: -2px;
-      width: 14px;
-      height: 14px;
-      background: #22c55e;
-      border: 3px solid #f8fafc;
-      border-radius: 50%;
+      font-size: 23px;
+      box-shadow: 0 12px 28px rgba(3, 15, 35, .25);
     }
 
     .welcome-text .greeting {
       margin: 0;
-      font-size: 13px;
-      color: #64748b;
-      font-weight: 500;
+      font-size: 16px;
+      color: white;
+      font-weight: 600;
+      text-shadow: 0 2px 8px rgba(0,0,0,.4);
     }
 
     .user-name {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 800;
-      color: #0f172a;
+      margin: 2px 0 0;
+      font-size: 24px;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,.45);
     }
 
     .role-badge {
-      background: #edf2ff;
-      color: #3b82f6;
-      padding: 6px 14px;
+      background: rgba(255,255,255,.9);
+      color: #3474e8;
+      padding: 10px 22px;
       border-radius: 99px;
-      font-size: 12px;
-      font-weight: 800;
+      font-size: 14px;
+      font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      box-shadow: 0 8px 20px rgba(15, 53, 96, .14);
     }
 
     .info-card {
-      background: #0f172a;
+      background: rgba(4, 18, 39, .96);
       color: white;
-      padding: 20px;
-      border-radius: 24px;
+      padding: 26px 30px;
+      border-radius: 30px;
       display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
+      align-items: center;
+      gap: 22px;
+      margin: 54px 0 34px;
+      box-shadow: 0 18px 40px rgba(2, 10, 23, .32);
     }
 
     .info-icon {
-      width: 44px;
-      height: 44px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 14px;
+      width: 54px;
+      height: 54px;
+      flex: 0 0 54px;
+      background: rgba(255,255,255,.1);
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      color: #3b82f6;
+      font-size: 28px;
+      color: #3f83f8;
     }
 
     .info-text h3 {
       margin: 0;
-      font-size: 16px;
-      font-weight: 800;
+      font-size: 21px;
+      font-weight: 900;
     }
 
     .info-text p {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: #94a3b8;
+      margin: 6px 0 0;
+      font-size: 16px;
+      color: #cbd5e1;
       font-weight: 500;
     }
 
     .section-header {
       display: flex;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .section-header h3 {
       margin: 0;
-      font-size: 16px;
-      font-weight: 800;
+      font-size: 21px;
+      font-weight: 900;
       color: #0f172a;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .config-card {
-      background: white;
-      border-radius: 20px;
-      padding: 16px;
-      border: 1px solid #e2e8f0;
-      margin-bottom: 24px;
+    .section-header.light h3 {
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,.55);
     }
 
-    .input-grid {
+    .config-card {
+      background: rgba(255,255,255,.88);
+      border-radius: 28px;
+      padding: 18px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 14px;
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: 0 16px 36px rgba(10, 26, 48, .2);
+      backdrop-filter: blur(15px);
     }
 
-    .input-grid .custom-item:first-child {
+    .bus-field {
+      min-width: 0;
+      padding: 13px 17px;
+      background: rgba(255,255,255,.6);
+    }
+
+    .plate-field {
       grid-column: 1 / -1;
     }
 
-    .custom-item {
-      --background: #f8fafc;
-      --border-radius: 12px;
-      --padding-start: 12px;
-      --highlight-height: 0;
-      border: 1px solid #f1f5f9;
+    .bus-field span {
+      display: block;
+      font-size: 13px;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
+    .bus-field input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      padding: 0;
+      background: transparent;
+      color: #090f1c;
+      font: inherit;
+      font-size: 19px;
+    }
+
+    .lower-panel {
+      position: relative;
+      z-index: 2;
+      margin-top: -1px;
+      padding: 28px 56px 32px;
+      background:
+        linear-gradient(rgba(61, 60, 59, .56), rgba(61, 60, 59, .56)),
+        url('/assets/driver-bus-interior.png') center / cover fixed;
     }
 
     .main-actions {
       display: grid;
       grid-template-columns: 1.5fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
+      gap: 16px;
+      margin-bottom: 34px;
     }
 
     .main-actions button {
-      padding: 16px;
-      border-radius: 16px;
-      font-weight: 800;
-      font-size: 14px;
+      min-height: 68px;
+      padding: 16px 20px;
+      border-radius: 24px;
+      font-weight: 900;
+      font-size: 17px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       cursor: pointer;
       transition: all 0.2s;
       border: none;
     }
 
     .btn-primary {
-      background: #3b82f6;
+      background: linear-gradient(135deg, #377ff6, #2f6fe9);
       color: white;
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 12px 26px rgba(35, 101, 235, .4);
     }
 
     .btn-secondary {
-      background: white;
+      background: rgba(255,255,255,.95);
       color: #0f172a;
-      border: 1px solid #e2e8f0 !important;
     }
 
     .scanner-section {
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
     .scanner-container {
       position: relative;
-      background: white;
-      border-radius: 24px;
-      padding: 12px;
-      border: 1px solid #e2e8f0;
+      min-height: 255px;
+      background: rgba(255,255,255,.97);
+      border-radius: 28px;
+      padding: 18px;
       overflow: hidden;
+      box-shadow: 0 15px 35px rgba(24, 24, 27, .18);
     }
 
     #reader {
       border: none !important;
-      border-radius: 16px;
+      border-radius: 18px;
       overflow: hidden;
+      min-height: 215px;
     }
 
     .scan-result {
-      background: white;
+      background: rgba(255,255,255,.96);
       border-radius: 20px;
       padding: 16px;
       display: flex;
       align-items: center;
       gap: 16px;
-      border: 1px solid #e2e8f0;
       animation: slideUp 0.3s ease-out;
     }
 
@@ -342,14 +405,48 @@ import { OfflineService } from '../core/offline.service';
     .scan-result.denied ion-icon, .scan-result.denied h4 {
       color: #ef4444;
     }
+
+    @media (max-width: 600px) {
+      .hero {
+        min-height: 680px;
+        padding: 104px 22px 26px;
+      }
+
+      .avatar-fallback {
+        width: 54px;
+        height: 54px;
+        border-radius: 17px;
+        font-size: 19px;
+      }
+
+      .user-name { font-size: 20px; }
+      .welcome-text .greeting { font-size: 14px; }
+      .role-badge { padding: 8px 15px; font-size: 12px; }
+      .info-card { margin-top: 48px; }
+      .info-card { padding: 22px; border-radius: 25px; }
+      .info-text h3 { font-size: 18px; }
+      .info-text p { font-size: 14px; }
+      .section-header h3 { font-size: 19px; }
+      .lower-panel { padding: 26px 22px 30px; background-attachment: scroll; }
+      .main-actions button { min-height: 62px; font-size: 14px; border-radius: 21px; }
+    }
+
+    @media (max-width: 390px) {
+      .hero { padding-left: 16px; padding-right: 16px; }
+      .lower-panel { padding-left: 16px; padding-right: 16px; }
+      .main-actions { grid-template-columns: 1.35fr 1fr; gap: 10px; }
+      .main-actions button { padding: 12px 8px; font-size: 12px; }
+      .info-icon { display: none; }
+    }
   `]
 })
-export class DriverPage implements OnInit {
+export class DriverPage implements OnInit, OnDestroy {
   data?: BootstrapData; round?: PickupRound; message = '';
   lastScanValid?: boolean;
   scanning = false;
   lastToken = '';
   lastScanAt = 0;
+  private scanner?: Html5Qrcode;
   driverName = 'Driver';
   plate = 'LT 4892 A'; color = 'Blue'; capacity = 30;
   get currentUser() { return JSON.parse(localStorage.getItem('ests_user') || '{}'); }
@@ -372,6 +469,12 @@ export class DriverPage implements OnInit {
     window.addEventListener('online', () => this.offline.syncQueuedScans());
   }
 
+  ngOnDestroy() {
+    if (this.scanner?.isScanning) {
+      void this.scanner.stop().catch(() => undefined);
+    }
+  }
+
   startRound() {
     if (!this.busId) return;
     this.api.startRound(this.busId).subscribe(round => {
@@ -390,9 +493,30 @@ export class DriverPage implements OnInit {
     });
   }
 
-  private initScanner() {
-    const scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: { width: 240, height: 240 } }, false);
-    scanner.render(token => this.handleScan(token), () => undefined);
+  private async initScanner() {
+    this.scanner = new Html5Qrcode('reader');
+    try {
+      await this.scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
+        token => this.handleScan(token),
+        () => undefined
+      );
+    } catch (error) {
+      this.lastScanValid = false;
+      this.message = this.cameraErrorMessage(error);
+    }
+  }
+
+  private cameraErrorMessage(error: unknown) {
+    const detail = String(error || '').toLowerCase();
+    if (detail.includes('permission') || detail.includes('notallowed')) {
+      return 'Camera access was denied. Allow camera permission in your browser settings and reopen this page.';
+    }
+    if (!window.isSecureContext && location.hostname !== 'localhost') {
+      return 'Camera scanning requires HTTPS or localhost.';
+    }
+    return 'Could not start the camera. Check that another app is not using it, then reopen this page.';
   }
 
   private async handleScan(token: string) {

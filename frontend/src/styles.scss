@@ -128,13 +128,234 @@ ion-toolbar { --background: #fff; --border-color: #e5e9f2; }
 }
 
 ion-tab-bar {
-  --background: #fff;
-  --border: 1px solid #e5e9f2;
-  height: 72px;
+  --background: rgba(255, 255, 255, .96);
+  --border: 0;
+  height: 76px;
+  margin: 0 auto;
+  box-shadow: 0 -10px 32px rgba(4, 18, 39, .16);
+  backdrop-filter: blur(18px);
+}
+
+ion-tabs.app-tabs ion-content:not(.driver-content) {
+  --background:
+    linear-gradient(180deg, rgba(3, 32, 67, .34), rgba(7, 18, 35, .72)),
+    url("/assets/ChatGPT Image May 25, 2026, 08_40_04 PM.png") center / cover fixed;
+}
+
+ion-tabs.app-tabs ion-content:not(.driver-content) .page {
+  width: min(100%, 760px);
+  max-width: 760px;
+  padding: 112px 24px 112px;
+  background: transparent !important;
+}
+
+.app-navbar {
+  position: fixed;
+  z-index: 1001;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  width: min(calc(100% - 28px), 1000px);
+  min-height: 66px;
+  padding: 10px 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, .68);
+  border-radius: 22px;
+  background: rgba(4, 18, 39, .9);
+  color: #fff;
+  box-shadow: 0 16px 38px rgba(3, 15, 34, .25);
+  backdrop-filter: blur(18px);
+}
+
+.menu-button,
+.nav-profile {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 0;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+
+.menu-button {
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  font-size: 25px;
+}
+
+.nav-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-title strong,
+.nav-title span {
+  display: block;
+}
+
+.nav-title strong {
+  font-size: 16px;
+}
+
+.nav-title span {
+  margin-top: 2px;
+  color: #b8c8df;
+  font-size: 12px;
+}
+
+.nav-profile {
+  background: #3478ee;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.app-menu {
+  --width: min(84vw, 330px);
+  --ion-background-color: #f7f9fd;
+}
+
+.menu-head {
+  margin: 22px 16px 18px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(4, 18, 39, .9), rgba(28, 92, 192, .82)),
+    url("/assets/ChatGPT Image May 25, 2026, 08_40_04 PM.png") center / cover;
+  color: #fff;
+}
+
+.menu-avatar {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  border: 1px solid rgba(255, 255, 255, .7);
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 18, 39, .8);
+  font-weight: 900;
+}
+
+.menu-head strong,
+.menu-head span {
+  display: block;
+}
+
+.menu-head span {
+  margin-top: 3px;
+  color: #c6d5eb;
+  font-size: 12px;
+}
+
+.app-menu ion-list {
+  padding: 0 10px;
+  background: transparent;
+}
+
+.app-menu ion-item {
+  --background: transparent;
+  --border-radius: 15px;
+  --color: #172033;
+  margin: 5px 0;
+  font-weight: 750;
+}
+
+.app-menu ion-item ion-icon {
+  color: #2f72e8;
+}
+
+.app-menu .logout-item {
+  --background: #fff1f2;
+  --color: #c92335;
+  margin-top: 18px;
+}
+
+.app-menu .logout-item ion-icon {
+  color: #dc2639;
+}
+
+ion-tabs.role-admin ion-content .page {
+  width: min(100%, 1040px);
+  max-width: 1040px;
+}
+
+ion-tabs.app-tabs ion-content:not(.driver-content) .title,
+ion-tabs.app-tabs ion-content:not(.driver-content) .section-title,
+ion-tabs.app-tabs ion-content:not(.driver-content) .topbar h1,
+ion-tabs.app-tabs ion-content:not(.driver-content) .topbar h2,
+ion-tabs.app-tabs ion-content:not(.driver-content) .headline h1 {
+  color: #fff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .4);
+}
+
+ion-tabs.app-tabs ion-content:not(.driver-content) .muted,
+ion-tabs.app-tabs ion-content:not(.driver-content) .greeting,
+ion-tabs.app-tabs ion-content:not(.driver-content) .headline p {
+  color: rgba(255, 255, 255, .82) !important;
+}
+
+ion-tabs.app-tabs ion-content:not(.driver-content) .card,
+ion-tabs.app-tabs ion-content:not(.driver-content) .summary-card,
+ion-tabs.app-tabs ion-content:not(.driver-content) .status-card,
+ion-tabs.app-tabs ion-content:not(.driver-content) .quick-links,
+ion-tabs.app-tabs ion-content:not(.driver-content) .response-banner {
+  background: rgba(255, 255, 255, .9) !important;
+  border: 1px solid rgba(255, 255, 255, .68) !important;
+  box-shadow: 0 18px 44px rgba(3, 15, 34, .22) !important;
+  backdrop-filter: blur(18px);
+}
+
+ion-tabs.app-tabs ion-content ion-item {
+  --background: rgba(246, 249, 255, .9);
+}
+
+ion-tabs.app-tabs ion-tab-button {
+  --color: #5f6878;
+  --color-selected: #246cf0;
+  font-weight: 750;
+}
+
+ion-tabs.app-tabs ion-tab-button ion-icon {
+  font-size: 23px;
+}
+
+ion-tabs.role-driver ion-tab-bar {
+  max-width: 760px;
+}
+
+ion-tabs.role-admin ion-tab-bar {
+  max-width: 1040px;
+}
+
+@media (min-width: 900px) {
+  ion-tabs.role-admin ion-content .metric-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  ion-tabs.role-admin ion-content .quick {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 360px) {
   .page { padding-left: 14px; padding-right: 14px; }
   .title { font-size: 24px; }
   .metric strong { font-size: 26px; }
+
+  ion-tabs.app-tabs ion-content:not(.driver-content) .page {
+    padding: 104px 14px 112px;
+  }
+
+  ion-tabs.role-admin ion-tab-button ion-label,
+  ion-tabs.role-student ion-tab-button ion-label {
+    font-size: 10px;
+  }
 }

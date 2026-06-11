@@ -32,18 +32,26 @@ apiRouter.put('/profile', requireAuth(), async (req, res, next) => {
   try {
     const body = z.object({
       fullName: z.string().min(2),
+      email: z.string().email(),
       password: z.string().min(8).optional().or(z.literal('')),
-      photoDataUrl: z.string().max(700000).optional().or(z.literal(''))
+      photoDataUrl: z.string().max(700000).optional().or(z.literal('')),
+      matricule: z.string().max(80).optional().or(z.literal('')),
+      levelLabel: z.string().max(80).optional().or(z.literal('')),
+      department: z.string().max(160).optional().or(z.literal(''))
     }).parse(req.body);
     const passwordHash = body.password ? await bcrypt.hash(body.password, 12) : null;
     const result = await query(
       `UPDATE users
        SET full_name=$2,
-           password_hash=COALESCE($3, password_hash),
-           photo_data_url=COALESCE(NULLIF($4, ''), photo_data_url)
+           email=LOWER($3),
+           password_hash=COALESCE($4, password_hash),
+           photo_data_url=COALESCE(NULLIF($5, ''), photo_data_url),
+           matricule=CASE WHEN $6='student' THEN COALESCE(NULLIF($7, ''), matricule) ELSE matricule END,
+           level_label=CASE WHEN $6='student' THEN COALESCE(NULLIF($8, ''), level_label) ELSE level_label END,
+           department=CASE WHEN $6='student' THEN COALESCE(NULLIF($9, ''), department) ELSE department END
        WHERE id=$1
        RETURNING id, full_name, email, matricule, level_label, department, photo_data_url`,
-      [req.user.id, body.fullName, passwordHash, body.photoDataUrl || '']
+      [req.user.id, body.fullName, body.email, passwordHash, body.photoDataUrl || '', req.user.role, body.matricule || '', body.levelLabel || '', body.department || '']
     );
     res.json(result.rows[0]);
   } catch (error) {

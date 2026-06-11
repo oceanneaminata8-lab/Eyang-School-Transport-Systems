@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { IonButton, IonContent, IonInput, IonItem, IonText } from '@ionic/angular/standalone';
 import { AdminProfile, ApiService } from '../core/api.service';
 
@@ -28,6 +29,7 @@ import { AdminProfile, ApiService } from '../core/api.service';
           <ion-item><ion-input label="New Password" labelPlacement="stacked" type="password" placeholder="Leave blank to keep current" [(ngModel)]="password" /></ion-item>
           
           <ion-button expand="block" class="primary-button" (click)="save()">Save Changes</ion-button>
+          <button class="logout-button" type="button" (click)="logout()">Log Out</button>
           @if (message) { <ion-text [color]="message.includes('updated') ? 'success' : 'danger'">{{ message }}</ion-text> }
         </section>
 
@@ -45,6 +47,7 @@ import { AdminProfile, ApiService } from '../core/api.service';
     .photo-button input{position:absolute;inset:0;opacity:0}
     ion-item{--background:#f2f5fb;--border-radius:16px;margin:12px 0}
     .info-card{padding:16px;background:rgba(33,91,230,0.05);border:none}
+    .logout-button{width:100%;min-height:54px;margin-top:12px;border:1px solid #fecaca;border-radius:18px;background:#fff1f2;color:#dc2626;font-weight:850;font-size:15px}
   `]
 })
 export class AdminProfilePage implements OnInit {
@@ -55,7 +58,7 @@ export class AdminProfilePage implements OnInit {
   photoPreview = '';
   message = '';
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private router: Router) {}
 
   ngOnInit() {
     this.load();
@@ -106,5 +109,12 @@ export class AdminProfilePage implements OnInit {
       },
       error: err => this.message = err.error?.message || 'Could not update profile.'
     });
+  }
+
+  logout() {
+    localStorage.removeItem('ests_token');
+    localStorage.removeItem('ests_user');
+    localStorage.removeItem('active_round');
+    void this.router.navigateByUrl('/login');
   }
 }

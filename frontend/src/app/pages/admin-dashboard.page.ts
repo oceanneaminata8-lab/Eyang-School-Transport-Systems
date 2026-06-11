@@ -13,7 +13,7 @@ import { AdminDashboard, ApiService } from '../core/api.service';
     <ion-content>
       <main class="page">
         <header class="topbar">
-          <div class="admin-brand"><img class="school-logo" src="assets/st jean logo.png" alt="Saint Jean Ingenieur logo"><div><p class="muted">Saint Jean Ingenieur</p><h1 class="title">Admin Panel</h1></div></div>
+          <div class="admin-brand"><div><p class="muted">Transport Management</p><h1 class="title">Admin Panel</h1></div></div>
           <a routerLink="/app/admin-profile">
             @if (photoPreview || data?.profile?.photo_data_url) {
               <img class="profile-photo" [src]="photoPreview || data?.profile?.photo_data_url" alt="Admin photo">
@@ -69,7 +69,7 @@ import { AdminDashboard, ApiService } from '../core/api.service';
   `,
   styles: [`
     .headline{display:flex;justify-content:space-between;gap:12px}
-    .admin-brand{display:flex;align-items:center;gap:12px}.school-logo{width:48px;height:48px;border-radius:14px;object-fit:contain;background:#fff;padding:5px;box-shadow:0 8px 18px rgba(18,28,45,.08)}
+    .admin-brand{display:flex;align-items:center;gap:12px}
     .profile-photo{width:48px;height:48px;border-radius:14px;object-fit:cover}
     .profile-card{padding:18px;margin-top:18px}
     .profile-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
