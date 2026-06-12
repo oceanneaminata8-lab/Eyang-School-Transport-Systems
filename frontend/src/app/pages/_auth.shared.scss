@@ -430,6 +430,16 @@ ion-checkbox:focus-visible {
   }
 }
 
+@media (min-width: 1000px) {
+  .auth-shell {
+    width: min(42vw, 460px);
+  }
+
+  .auth-card {
+    padding: 30px;
+  }
+}
+
 @media (max-width: 640px) {
   .auth-page {
     justify-content: center;
@@ -471,5 +481,29 @@ ion-checkbox:focus-visible {
     align-items: flex-start;
     flex-direction: column;
     gap: 10px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 620px) {
+  .auth-page {
+    place-items: start center;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .auth-shell {
+    width: min(82vw, 620px);
+  }
+
+  .auth-card {
+    padding: 18px 22px;
+  }
+
+  .card-heading {
+    margin-bottom: 12px;
+  }
+
+  .field-group {
+    margin-bottom: 9px;
   }
 }

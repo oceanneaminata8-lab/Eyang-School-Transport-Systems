@@ -46,7 +46,9 @@ export class SignupPage {
   showPassword = false;
   showConfirmPassword = false;
   loading = false;
+  resetLoading = false;
   error = '';
+  successMessage = '';
 
   readonly signupForm = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -86,6 +88,7 @@ export class SignupPage {
     }
 
     this.error = '';
+    this.successMessage = '';
     this.loading = true;
     const { fullName, email, password, role } = this.signupForm.getRawValue();
 
@@ -97,6 +100,32 @@ export class SignupPage {
       error: err => {
         this.loading = false;
         this.error = err.error?.message || 'Registration failed. Please try again.';
+      }
+    });
+  }
+
+  forgotPassword() {
+    const emailControl = this.signupForm.controls.email;
+    emailControl.markAsTouched();
+
+    if (!emailControl.value || emailControl.invalid) {
+      this.successMessage = '';
+      this.error = 'Enter a valid email address first.';
+      return;
+    }
+
+    this.error = '';
+    this.successMessage = '';
+    this.resetLoading = true;
+
+    this.api.forgotPassword(emailControl.value).subscribe({
+      next: response => {
+        this.resetLoading = false;
+        this.successMessage = response.message;
+      },
+      error: err => {
+        this.resetLoading = false;
+        this.error = err.error?.message || 'Failed to send the password reset link.';
       }
     });
   }

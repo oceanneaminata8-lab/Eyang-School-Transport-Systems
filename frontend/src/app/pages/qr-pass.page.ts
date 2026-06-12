@@ -20,7 +20,13 @@ import { OfflineService } from '../core/offline.service';
       </main>
     </ion-content>
   `,
-  styles: [`.qr-full{padding:28px;text-align:center;margin:28px 0}.qr-full img{width:280px;max-width:90%;}.qr-full h2{margin-bottom:4px}`]
+  styles: [`
+    .qr-full{padding:clamp(20px,6vw,34px);text-align:center;margin:24px 0;border-radius:28px}
+    .qr-full img{width:min(100%,320px);aspect-ratio:1;object-fit:contain}
+    .qr-full h2{margin:16px 0 4px;font-size:clamp(20px,6vw,28px)}
+    .qr-full .status{display:inline-flex;margin-top:12px}
+    @media(min-width:800px){main.page{max-width:680px}}
+  `]
 })
 export class QrPassPage implements OnInit {
   monthKey = new Date().toISOString().slice(0, 7);

@@ -54,6 +54,8 @@ import { ApiService, AppNotification } from '../core/api.service';
     ion-item{--background:transparent;--padding-start:0;--inner-padding-end:0}
     ion-item-sliding{border-bottom:1px solid #edf1f7}
     ion-item-option{font-weight:850}
+    .row-main p{white-space:normal;overflow:visible;text-overflow:clip}
+    @media(max-width:480px){.actions{display:grid;grid-template-columns:1fr 1fr}.actions ion-button{margin:0}.row{padding-inline:10px}}
   `]
 })
 export class NotificationsPage implements OnInit {

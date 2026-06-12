@@ -33,10 +33,11 @@ import { locationOutline, logInOutline, personAddOutline, qrCodeOutline, shieldC
     .splash {
       position: relative;
       min-height: 100%;
-      padding: 60px 24px 40px;
+      padding: max(32px, env(safe-area-inset-top)) clamp(18px, 5vw, 48px) max(28px, env(safe-area-inset-bottom));
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      align-items: center;
       color: #fff;
       overflow: hidden;
     }
@@ -111,13 +112,15 @@ import { locationOutline, logInOutline, personAddOutline, qrCodeOutline, shieldC
     }
 
     .actions {
+      width: min(100%, 460px);
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       gap: 14px;
-      margin-bottom: 40px;
+      margin: auto 0 36px;
     }
 
     .actions ion-button {
+      flex: 1;
       height: 60px;
       --border-radius: 18px;
       font-weight: 800;
@@ -129,17 +132,16 @@ import { locationOutline, logInOutline, personAddOutline, qrCodeOutline, shieldC
     .login-button {
       --background: #fff;
       --color: #0f172a;
-      max-width: 200px;
     }
 
     .signup-button {
       --background: rgba(255,255,255,0.15);
       --color: #fff;
       backdrop-filter: blur(10px);
-      max-width: 200px;
     }
 
     .features {
+      width: min(100%, 620px);
       display: flex;
       justify-content: space-between;
       gap: 10px;
@@ -171,6 +173,42 @@ import { locationOutline, logInOutline, personAddOutline, qrCodeOutline, shieldC
       .hero-copy h1 { font-size: 32px; }
       .hero-copy p { font-size: 16px; }
       .features { display: none; }
+    }
+
+    @media (max-width: 520px) {
+      .actions {
+        flex-direction: column;
+        margin-bottom: 26px;
+      }
+
+      .actions ion-button {
+        width: 100%;
+        flex: none;
+      }
+
+      .features {
+        gap: 4px;
+      }
+
+      .feat-item span {
+        font-size: 10px;
+        text-align: center;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 540px) {
+      .splash {
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .actions {
+        margin: 0;
+      }
+
+      .features {
+        display: none;
+      }
     }
   `]
 })

@@ -549,6 +549,86 @@ import { OfflineService } from '../core/offline.service';
       font-weight: 700;
       color: #475569;
     }
+
+    @media (min-width: 820px) {
+      .student-dashboard {
+        max-width: 920px;
+        padding: 32px;
+      }
+
+      .grid-sections {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .summary-card {
+        min-height: 220px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .student-dashboard {
+        padding: 16px;
+      }
+
+      .topbar {
+        gap: 10px;
+      }
+
+      .user-info {
+        min-width: 0;
+      }
+
+      .welcome-text {
+        min-width: 0;
+      }
+
+      .user-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .summary-card {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      .status-card {
+        flex-wrap: wrap;
+      }
+
+      .status-amount,
+      .status-tag {
+        margin-left: 64px;
+      }
+
+      .alert-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .profile-photo,
+      .avatar-fallback {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+      }
+
+      .quick-links {
+        gap: 8px;
+      }
+
+      .link-item {
+        padding: 13px 6px;
+        border-radius: 16px;
+      }
+
+      .link-item span {
+        font-size: 10px;
+      }
+    }
   `]
 })
 export class StudentDashboardPage implements OnInit {

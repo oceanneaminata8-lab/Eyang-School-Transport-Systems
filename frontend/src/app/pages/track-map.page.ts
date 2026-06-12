@@ -27,6 +27,8 @@ import { ApiService, Bus, PickupPoint } from '../core/api.service';
     .full{height:420px;margin-top:22px;position:relative;background:#edf1f7}
     .tile-error{background-image:linear-gradient(#cfd5df 1px,transparent 1px),linear-gradient(90deg,#cfd5df 1px,transparent 1px);background-size:48px 48px}
     .map-warning{position:absolute;left:14px;right:14px;bottom:14px;z-index:500;background:#fff;border:1px solid #e2e7f0;border-radius:14px;padding:10px 12px;color:#8b98ad;font-weight:800;font-size:13px}
+    @media(min-width:900px){main.page{max-width:980px}.full{height:min(58vh,560px)}}
+    @media(max-width:600px){.full{height:clamp(300px,52vh,420px);margin-top:16px}.map-warning{font-size:11px;left:8px;right:8px;bottom:8px}}
   `]
 })
 export class TrackMapPage implements AfterViewInit {

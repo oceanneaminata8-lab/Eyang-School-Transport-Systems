@@ -19,7 +19,13 @@ import { ApiService, BootstrapData } from '../core/api.service';
       </main>
     </ion-content>
   `,
-  styles: [`.form{padding:18px;margin-top:24px} ion-item{--background:#f2f5fb;--border-radius:16px;margin:12px 0}`]
+  styles: [`
+    .form{padding:clamp(18px,5vw,28px);margin-top:24px}
+    ion-item{--background:#f2f5fb;--border-radius:16px;margin:12px 0}
+    ion-text{display:block;margin-top:14px;font-weight:750;line-height:1.45}
+    @media(min-width:800px){main.page{max-width:720px}}
+    @media(max-width:420px){.form{margin-top:18px;padding:16px}}
+  `]
 })
 export class ReservationPage implements OnInit {
   data?: BootstrapData; busId = ''; pickupPointId = ''; monthKey = new Date().toISOString().slice(0, 7); message = '';

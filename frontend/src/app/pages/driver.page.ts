@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Geolocation } from '@capacitor/geolocation';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { carOutline, qrCodeOutline, locationOutline, checkmarkCircleOutline, alertCircleOutline, shieldCheckmarkOutline } from 'ionicons/icons';
+import { carOutline, qrCodeOutline, locationOutline, checkmarkCircleOutline, alertCircleOutline, shieldCheckmarkOutline, cameraOutline, refreshOutline } from 'ionicons/icons';
 import { Html5Qrcode } from 'html5-qrcode';
 import { ApiService, BootstrapData, PickupRound } from '../core/api.service';
 import { OfflineService } from '../core/offline.service';
@@ -62,11 +62,11 @@ import { OfflineService } from '../core/offline.service';
 
         <section class="lower-panel">
           <div class="main-actions">
-            <button class="btn-primary" (click)='startRound()'>
+            <button class="btn-primary" type="button" [disabled]="startingRound || !assignedBus" (click)="startRound()">
               <ion-icon name="qr-code-outline"></ion-icon>
-              Start Pickup Round
+              {{ startingRound ? 'Starting Round...' : (round ? 'Pickup Round Active' : 'Start Pickup Round') }}
             </button>
-            <button class="btn-secondary" (click)="sendGps()">
+            <button class="btn-secondary" type="button" [disabled]="!assignedBus" (click)="sendGps()">
               <ion-icon name="location-outline"></ion-icon>
               Send GPS
             </button>
@@ -78,6 +78,16 @@ import { OfflineService } from '../core/offline.service';
             </div>
             <div class="scanner-container">
               <div id="reader"></div>
+              @if (!cameraActive) {
+                <div class="camera-placeholder">
+                  <ion-icon name="camera-outline"></ion-icon>
+                  <p>{{ cameraStatus }}</p>
+                  <button type="button" class="camera-button" [disabled]="cameraStarting" (click)="initScanner()">
+                    <ion-icon [name]="cameraStarting ? 'refresh-outline' : 'camera-outline'"></ion-icon>
+                    {{ cameraStarting ? 'Opening Camera...' : 'Enable Camera' }}
+                  </button>
+                </div>
+              }
             </div>
           </section>
 
@@ -322,6 +332,11 @@ import { OfflineService } from '../core/offline.service';
       border: none;
     }
 
+    .main-actions button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
     .btn-primary {
       background: linear-gradient(135deg, #377ff6, #2f6fe9);
       color: white;
@@ -345,6 +360,48 @@ import { OfflineService } from '../core/offline.service';
       padding: 18px;
       overflow: hidden;
       box-shadow: 0 15px 35px rgba(24, 24, 27, .18);
+    }
+
+    .camera-placeholder {
+      min-height: 280px;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      text-align: center;
+      color: #dbe8ff;
+    }
+
+    .camera-placeholder > ion-icon {
+      font-size: 54px;
+      color: #79a9ff;
+    }
+
+    .camera-placeholder p {
+      max-width: 440px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .camera-button {
+      min-height: 46px;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: #2f75f4;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .camera-button:disabled {
+      opacity: .65;
+      cursor: wait;
     }
 
     #reader {
@@ -434,9 +491,13 @@ import { OfflineService } from '../core/offline.service';
     @media (max-width: 390px) {
       .hero { padding-left: 16px; padding-right: 16px; }
       .lower-panel { padding-left: 16px; padding-right: 16px; }
-      .main-actions { grid-template-columns: 1.35fr 1fr; gap: 10px; }
+      .main-actions { grid-template-columns: 1fr; gap: 10px; }
       .main-actions button { padding: 12px 8px; font-size: 12px; }
       .info-icon { display: none; }
+      .config-card { grid-template-columns: 1fr; }
+      .plate-field { grid-column: auto; }
+      .scanner-container { padding: 10px; }
+      .camera-placeholder { min-height: 230px; padding-inline: 12px; }
     }
   `]
 })
@@ -446,26 +507,39 @@ export class DriverPage implements OnInit, OnDestroy {
   scanning = false;
   lastToken = '';
   lastScanAt = 0;
+  startingRound = false;
+  cameraActive = false;
+  cameraStarting = false;
+  cameraStatus = 'Select Enable Camera, then choose Allow in Chrome.';
   private scanner?: Html5Qrcode;
   driverName = 'Driver';
   plate = 'LT 4892 A'; color = 'Blue'; capacity = 30;
   get currentUser() { return JSON.parse(localStorage.getItem('ests_user') || '{}'); }
-  get assignedBus() { return this.data?.buses.find(bus => bus.driver_id === this.currentUser.id) || this.data?.buses[0]; }
+  get assignedBus() { return this.data?.buses.find(bus => bus.driver_id === this.currentUser.id); }
   get busId() { return this.assignedBus?.id || ''; }
 
   constructor(private api: ApiService, private offline: OfflineService) {
-    addIcons({ carOutline, qrCodeOutline, locationOutline, checkmarkCircleOutline, alertCircleOutline, shieldCheckmarkOutline });
+    addIcons({ carOutline, qrCodeOutline, locationOutline, checkmarkCircleOutline, alertCircleOutline, shieldCheckmarkOutline, cameraOutline, refreshOutline });
   }
 
   ngOnInit() {
-    this.api.bootstrap().subscribe(data => {
-      this.data = data;
-      this.driverName = data.profile?.full_name || this.currentUser.fullName || 'Driver';
-      this.plate = this.assignedBus?.plate_number || this.plate;
-      this.color = this.assignedBus?.color || this.color;
-      this.capacity = this.assignedBus?.capacity || this.capacity;
+    this.api.bootstrap().subscribe({
+      next: data => {
+        this.data = data;
+        this.driverName = data.profile?.full_name || this.currentUser.fullName || 'Driver';
+        this.plate = this.assignedBus?.plate_number || this.plate;
+        this.color = this.assignedBus?.color || this.color;
+        this.capacity = this.assignedBus?.capacity || this.capacity;
+        if (!this.assignedBus) {
+          this.lastScanValid = false;
+          this.message = 'No bus is assigned to this driver account. Ask an administrator to assign a bus before starting a pickup round.';
+        }
+      },
+      error: error => {
+        this.lastScanValid = false;
+        this.message = this.apiErrorMessage(error, 'Could not load the driver account. Please sign in again and retry.');
+      }
     });
-    setTimeout(() => this.initScanner(), 300);
     window.addEventListener('online', () => this.offline.syncQueuedScans());
   }
 
@@ -476,11 +550,29 @@ export class DriverPage implements OnInit, OnDestroy {
   }
 
   startRound() {
-    if (!this.busId) return;
-    this.api.startRound(this.busId).subscribe(round => {
-      this.round = round;
-      localStorage.setItem('active_round', round.id);
-      this.message = `Pickup round started. ${round.notifiedStudents || 0} students notified.`;
+    if (this.startingRound || this.round) return;
+    if (!this.busId) {
+      this.lastScanValid = false;
+      this.message = 'A bus must be assigned to your driver account before you can start a pickup round.';
+      return;
+    }
+
+    this.startingRound = true;
+    this.lastScanValid = undefined;
+    this.message = 'Starting pickup round...';
+    this.api.startRound(this.busId).subscribe({
+      next: round => {
+        this.round = round;
+        localStorage.setItem('active_round', round.id);
+        this.lastScanValid = true;
+        this.message = `Pickup round started. ${round.notifiedStudents || 0} students notified.`;
+        this.startingRound = false;
+      },
+      error: error => {
+        this.lastScanValid = false;
+        this.message = this.apiErrorMessage(error, 'Could not start the pickup round. Check your connection and try again.');
+        this.startingRound = false;
+      }
     });
   }
 
@@ -493,25 +585,65 @@ export class DriverPage implements OnInit, OnDestroy {
     });
   }
 
-  private async initScanner() {
-    this.scanner = new Html5Qrcode('reader');
+  async initScanner() {
+    if (this.cameraStarting || this.cameraActive) return;
+
+    this.cameraStarting = true;
+    this.lastScanValid = undefined;
+    this.message = '';
+
     try {
+      if (!window.isSecureContext && location.hostname !== 'localhost') {
+        throw new Error('Camera scanning requires a secure context');
+      }
+
+      if (this.scanner) {
+        this.clearScanner();
+      }
+
+      this.scanner = new Html5Qrcode('reader');
       await this.scanner.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
         token => this.handleScan(token),
         () => undefined
       );
+      this.cameraActive = true;
+      this.cameraStatus = 'Camera is active.';
     } catch (error) {
+      this.cameraActive = false;
       this.lastScanValid = false;
       this.message = this.cameraErrorMessage(error);
+      this.cameraStatus = this.message;
+      this.clearScanner();
+      this.scanner = undefined;
+    } finally {
+      this.cameraStarting = false;
     }
+  }
+
+  private clearScanner() {
+    try {
+      this.scanner?.clear();
+    } catch {
+      // The scanner may already have released the video element after a failed start.
+    }
+  }
+
+  private apiErrorMessage(error: any, fallback: string) {
+    if (error?.status === 0) {
+      return 'The server could not be reached. Check that the backend is running and try again.';
+    }
+    if (error?.status === 401) {
+      return 'Your session has expired. Sign in again before starting a pickup round.';
+    }
+    return error?.error?.message || fallback;
   }
 
   private cameraErrorMessage(error: unknown) {
     const detail = String(error || '').toLowerCase();
     if (detail.includes('permission') || detail.includes('notallowed')) {
-      return 'Camera access was denied. Allow camera permission in your browser settings and reopen this page.';
+      return 'Chrome blocked the camera. Select the camera or site-controls icon beside the address, set Camera to Allow, reload this page, then select Enable Camera.';
     }
     if (!window.isSecureContext && location.hostname !== 'localhost') {
       return 'Camera scanning requires HTTPS or localhost.';

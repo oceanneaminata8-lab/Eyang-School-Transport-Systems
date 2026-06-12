@@ -48,6 +48,8 @@ import { OfflineService } from '../core/offline.service';
     .photo-button input{position:absolute;inset:0;opacity:0}
     ion-item{--background:#f2f5fb;--border-radius:16px;margin:12px 0}
     .logout-button{width:100%;min-height:54px;margin-top:12px;border:1px solid #fecaca;border-radius:18px;background:#fff1f2;color:#dc2626;font-weight:850;font-size:15px}
+    ion-text{display:block;margin-top:12px;font-weight:750}
+    @media(max-width:520px){.photo-row{flex-direction:column}.photo-button{width:100%}.form{padding:16px}.topbar{align-items:center}}
   `]
 })
 export class ProfilePage implements OnInit {

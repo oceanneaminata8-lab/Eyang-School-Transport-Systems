@@ -67,11 +67,21 @@
           </ion-item>
         </div>
 
+        <div class="password-help">
+          <span>Already registered with this email?</span>
+          <button type="button" class="text-link reset-link" (click)="forgotPassword()" [disabled]="resetLoading">
+            {{ resetLoading ? 'Sending...' : 'Forgot password?' }}
+          </button>
+        </div>
+
         @if (error) {
           <ion-text color="danger" class="feedback">{{ error }}</ion-text>
         }
+        @if (successMessage) {
+          <ion-text color="success" class="feedback">{{ successMessage }}</ion-text>
+        }
 
-        <ion-button type="submit" expand="block" class="submit-button submit-button--green" [disabled]="loading">
+        <ion-button type="submit" expand="block" class="submit-button submit-button--green" [disabled]="loading || resetLoading">
           <ion-icon name="person-add-outline" slot="start" aria-hidden="true"></ion-icon>
           {{ loading ? 'Creating account...' : 'Sign Up' }}
         </ion-button>

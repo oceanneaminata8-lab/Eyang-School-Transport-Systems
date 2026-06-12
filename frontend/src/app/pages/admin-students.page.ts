@@ -42,10 +42,12 @@ import { AdminDashboard, ApiService } from '../core/api.service';
     </ion-content>
   `,
   styles: [`
-    .form{padding:18px}.form h2{margin:0 0 12px}
+    .form{padding:clamp(18px,4vw,26px)}.form h2{margin:0 0 12px}
     .split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     ion-item{--background:#f2f5fb;--border-radius:16px;margin:10px 0}
     .row ion-button{--border-radius:14px;font-weight:800}
+    ion-text{display:block;margin-top:12px;font-weight:750}
+    @media(max-width:560px){.split{grid-template-columns:1fr}.row{flex-wrap:wrap}.row ion-button{margin-left:60px}}
   `]
 })
 export class AdminStudentsPage implements OnInit {

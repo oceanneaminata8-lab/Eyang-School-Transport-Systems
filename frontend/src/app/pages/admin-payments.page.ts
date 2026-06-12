@@ -85,6 +85,18 @@ import { AdminPaymentStudent, AdminPaymentsLedger, ApiService } from '../core/ap
     .reservation-line{margin-top:8px;color:#ef4444;font-size:13px;font-weight:800}.reservation-line.reserved{color:#18a650}
     .payment-message{margin:0 0 12px;color:#215be6;font-weight:800}
     .empty{padding:22px;text-align:center;color:#8b98ad;font-weight:800}
+    @media(max-width:720px){
+      .month{height:auto;min-height:58px}.month ion-button{font-size:12px}
+      ion-segment{width:100%;padding-bottom:4px}
+      .summary{padding:20px;border-radius:22px}.summary strong{font-size:clamp(25px,8vw,32px)}
+      .pay-row{flex-wrap:wrap}.pay-side{width:100%;padding-left:60px;align-items:flex-start;text-align:left}
+      .summary-grid{gap:7px}.summary-grid span{padding:9px 6px;font-size:12px}
+    }
+    @media(max-width:390px){
+      .topbar ion-button{display:none}.summary-grid{grid-template-columns:1fr}
+      .month{padding:0}.month div{gap:5px;font-size:13px}
+      .pay-side{padding-left:0}
+    }
   `]
 })
 export class AdminPaymentsPage implements OnInit {

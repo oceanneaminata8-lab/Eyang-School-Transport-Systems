@@ -76,13 +76,6 @@ import {
       <button class="menu-button" type="button" aria-label="Open navigation menu" (click)="openMenu()">
         <ion-icon name="menu-outline"></ion-icon>
       </button>
-      <div class="nav-title">
-        <strong>Eyang Transport</strong>
-        <span>{{ roleLabel }} Portal</span>
-      </div>
-      <a class="nav-profile" [routerLink]="profilePath" aria-label="Open profile">
-        {{ initials(user.fullName || role) }}
-      </a>
     </nav>
 
     <ion-tabs id="main-tabs" [class]="'app-tabs role-' + role">
@@ -116,10 +109,6 @@ export class TabsPage {
 
   get roleLabel() {
     return this.role.charAt(0).toUpperCase() + this.role.slice(1);
-  }
-
-  get profilePath() {
-    return this.role === 'admin' ? '/app/admin-profile' : '/app/profile';
   }
 
   get menuItems() {

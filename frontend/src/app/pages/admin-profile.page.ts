@@ -48,6 +48,8 @@ import { AdminProfile, ApiService } from '../core/api.service';
     ion-item{--background:#f2f5fb;--border-radius:16px;margin:12px 0}
     .info-card{padding:16px;background:rgba(33,91,230,0.05);border:none}
     .logout-button{width:100%;min-height:54px;margin-top:12px;border:1px solid #fecaca;border-radius:18px;background:#fff1f2;color:#dc2626;font-weight:850;font-size:15px}
+    ion-text{display:block;margin-top:12px;font-weight:750}
+    @media(max-width:520px){.photo-row{flex-direction:column}.photo-button{width:100%}.form{padding:16px}.topbar{align-items:center}}
   `]
 })
 export class AdminProfilePage implements OnInit {

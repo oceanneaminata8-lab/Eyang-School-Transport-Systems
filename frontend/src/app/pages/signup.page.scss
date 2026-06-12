@@ -1,1 +1,35 @@
 @use './auth.shared' as *;
+
+.password-help {
+  margin: -2px 2px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #697386;
+  font-size: 13px;
+}
+
+.reset-link {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #246cf0;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reset-link:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+@media (max-width: 420px) {
+  .password-help {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
